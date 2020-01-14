@@ -21,17 +21,32 @@ class Tree extends Component {
     clearSearch()
   }
 
+  copy = () => {
+    const { copyNodeId } = this.props
+    copyNodeId()
+  }
+
+  paste = () => {
+    const { selectedNodeId, copiedNodeId } = this.props.flowEditor
+    const {pasteNodeId} = this.props
+
+    pasteNodeId(selectedNodeId, copiedNodeId)
+  }
+
 
   render() {
-    // const { clearSearch } = this.props
-
+    const { copiedNodeId, selectedNodeId } = this.props.flowEditor
     return (
       <div>
         <input type="text" ref={(input) => {this.searchInput = input}}/>
         <button onClick={this.search}>Search</button>
         <button onClick={this.clearSearchText}>Clear</button>
         <button onClick={this.openAll}>visibleAll T/F</button>
-        {}
+        {selectedNodeId && <button onClick={this.copy}>Copy</button> }
+        {selectedNodeId !== copiedNodeId && copiedNodeId &&
+        <button onClick={this.paste}>Paste</button>
+        }
+
         <Node id={0}/>
       </div>
     )

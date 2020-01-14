@@ -12,6 +12,8 @@ export const CLEAR_SEARCH = 'CLEAR_SEARCH'
 export const VISIBLE_ALL = 'VISIBLE_ALL'
 export const SELECT_NODE = 'SELECT_NODE'
 export const UNSELECT_NODE = 'UNSELECT_NODE'
+export const COPY_NODE_ID = 'COPY_NODE_ID'
+export const PASTE_NODE_ID = 'PASTE_NODE_ID'
 
 export const increment = (nodeId) => ({
   type: INCREMENT,
@@ -44,12 +46,11 @@ export const deleteNode = (nodeId) => ({
   nodeId
 })
 
-export const addChild = (nodeId, childId, action_id, childVisible) => ({
+export const addChild = (nodeId, childId, action_id) => ({
   type: ADD_CHILD,
   nodeId,
   childId,
-  action_id,
-  childVisible
+  action_id
 })
 
 export const removeChild = (nodeId, childId) => ({
@@ -72,6 +73,15 @@ export const  selectNode = (nodeId) => ({
 })
 export const  unselect = () => ({
   type: UNSELECT_NODE,
+})
+
+export const  copyNodeId = () => ({
+  type: COPY_NODE_ID
+})
+export const  pasteNodeId = (nodeId, childId) => ({
+  type: PASTE_NODE_ID,
+  nodeId,
+  childId
 })
 
 

@@ -9,7 +9,10 @@ import {
   SEARCH,
   VISIBLE_ALL,
   SELECT_NODE,
-  CLEAR_SEARCH
+  CLEAR_SEARCH,
+  COPY_NODE_ID,
+  PASTE_NODE_ID
+
 } from '../actions'
 import generateTree from '../generateTree'
 
@@ -27,6 +30,7 @@ const childIds = (state, action) => {
 }
 
 const node = (state, action) => {
+  console.log('node',state, action )
   switch (action.type) {
     case CREATE_NODE:
       return {
@@ -86,6 +90,29 @@ const deleteMany = (state, ids) => {
   return {...state, treeList}
 }
 
+const pasteNode = (state, action  ) => {
+  const {nodeId, childId} = action
+  const checkNodeForPaste = getAllParentId(state, [nodeId])
+  console.log('checkNodeForPaste',checkNodeForPaste.indexOf(childId))
+  if( checkNodeForPaste.indexOf(childId) > 0 ){
+    console.log('error - loop') //TODO: after error
+    return state;
+  } else {
+    action.type='ADD_CHILD'
+    return{
+    ...state,
+      treeList: state.treeList.map((myNode, index) => {
+      const newNode = nodeId === myNode.id ? node(myNode, action) : myNode;
+      return Object.assign({}, node, {
+        ...state[index],
+        ...newNode
+      })
+    })
+
+    }
+  }
+}
+
 const search = (state, searchText) => {
   const treeSearchValues = state.treeList.reduce((newArr, node) => {
     let result = node.action_id.toLowerCase().indexOf(searchText.toLowerCase());
@@ -94,6 +121,7 @@ const search = (state, searchText) => {
     }
     return newArr;
   }, []);
+
   const nodeForVisible = getAllParentId(state, treeSearchValues).concat(treeSearchValues);
 
   return Object.assign({}, state, {
@@ -140,20 +168,25 @@ const getAllParentId = (state, treeSearchValues) => {
     let intersection = node.childIds.filter(x => treeSearchValues.includes(x));
     const uniqParent = nodeForVisible.indexOf(node.id)
     if (intersection.length > 0 && uniqParent < 0) {
-     return nodeForVisible.push(...nodeForVisible, node.id, ...getAllParentId(state, [node.id]))
+      return nodeForVisible.push(...nodeForVisible, node.id, ...getAllParentId(state, [node.id]))
     }
   })
   return nodeForVisible
 }
 
-export default (state = {
-  treeList: tree,
-  visibleAll: false,
-  selectedNodeId: null,
-  mainNodeIds: [0]
-}, action) => {
 
-  console.log('action.type:', action.type)
+//DEFAULT EXPORT
+
+export default (
+  state = {
+    treeList: tree,
+    visibleAll: false,
+    selectedNodeId: null,
+    copiedNodeId: null,
+    mainNodeIds: [0]
+  }, action) => {
+
+  console.log('action.type:', action.type, action)
 
   if (action.type === VISIBLE_ALL) {
     return Object.assign({}, state, {
@@ -195,7 +228,20 @@ export default (state = {
     })
   }
 
-  const {nodeId} = action
+  if (action.type === COPY_NODE_ID) {
+    return {
+      ...state,
+      copiedNodeId: state.selectedNodeId
+    }
+  }
+
+  if( action.type === PASTE_NODE_ID) {
+    return pasteNode(state, action)
+  }
+
+
+
+  const {nodeId} = action;
   if (typeof nodeId === 'undefined') {
     return state
   }
@@ -224,7 +270,7 @@ export default (state = {
   if (action.type === SELECT_NODE) {
     return {
       ...state,
-      selectedNodeId: nodeId
+      selectedNodeId: state.selectedNodeId !== nodeId ? nodeId : null
     }
   }
 

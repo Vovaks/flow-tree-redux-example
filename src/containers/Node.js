@@ -19,8 +19,10 @@ export class Node extends Component {
     e.preventDefault()
     const {addChild, createNode, id} = this.props
     // const childId = createNode().nodeId
-    const {nodeId, action_id, visible} = createNode()
-    addChild(id, nodeId, action_id, visible)
+    const {nodeId, action_id} = createNode()
+    console.log('addChild',id, nodeId, action_id)
+    addChild(id, nodeId, action_id)
+
   }
 
   handleRemoveClick = e => {
@@ -33,7 +35,6 @@ export class Node extends Component {
   renderChild = childId => {
     const {id} = this.props
     return (
-
       <li key={childId}>
         <ConnectedNode id={childId} parentId={id}/>
       </li>
