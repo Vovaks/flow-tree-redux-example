@@ -140,7 +140,7 @@ const getAllParentId = (state, treeSearchValues) => {
     let intersection = node.childIds.filter(x => treeSearchValues.includes(x));
     const uniqParent = nodeForVisible.indexOf(node.id)
     if (intersection.length > 0 && uniqParent < 0) {
-      nodeForVisible.push(node.id)
+     return nodeForVisible.push(...nodeForVisible, node.id, ...getAllParentId(state, [node.id]))
     }
   })
   return nodeForVisible
