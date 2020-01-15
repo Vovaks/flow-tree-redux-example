@@ -1,4 +1,4 @@
-import { name } from 'react-lorem-ipsum';
+import {name} from 'react-lorem-ipsum';
 
 export const INCREMENT = 'INCREMENT'
 export const CREATE_NODE = 'CREATE_NODE'
@@ -14,6 +14,7 @@ export const SELECT_NODE = 'SELECT_NODE'
 export const UNSELECT_NODE = 'UNSELECT_NODE'
 export const COPY_NODE_ID = 'COPY_NODE_ID'
 export const PASTE_NODE_ID = 'PASTE_NODE_ID'
+export const REMOVE_CHILD_FROM_PARENT = 'REMOVE_CHILD_FROM_PARENT'
 
 export const increment = (nodeId) => ({
   type: INCREMENT,
@@ -59,6 +60,12 @@ export const removeChild = (nodeId, childId) => ({
   childId
 })
 
+export const removeChildFromParent = (nodeId, childId) => ({
+  type: REMOVE_CHILD_FROM_PARENT,
+  childId,
+  nodeId
+})
+
 export const searchInList = (searchText) => ({
   type: SEARCH,
   searchText
@@ -67,21 +74,23 @@ export const clearSearch = () => ({
   type: CLEAR_SEARCH
 })
 
-export const  selectNode = (nodeId) => ({
+export const selectNode = (nodeId) => ({
   type: SELECT_NODE,
   nodeId,
 })
-export const  unselect = () => ({
+export const unselect = () => ({
   type: UNSELECT_NODE,
 })
 
-export const  copyNodeId = () => ({
+export const copyNodeId = () => ({
   type: COPY_NODE_ID
 })
-export const  pasteNodeId = (nodeId, childId) => ({
+export const pasteNodeId = (nodeId, childId) => ({
   type: PASTE_NODE_ID,
   nodeId,
   childId
 })
+
+
 
 

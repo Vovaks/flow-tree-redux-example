@@ -35,19 +35,24 @@ class Tree extends Component {
 
 
   render() {
-    const { copiedNodeId, selectedNodeId } = this.props.flowEditor
+    const { copiedNodeId, selectedNodeId, mainNodeIds } = this.props.flowEditor
     return (
       <div>
         <input type="text" ref={(input) => {this.searchInput = input}}/>
         <button onClick={this.search}>Search</button>
         <button onClick={this.clearSearchText}>Clear</button>
         <button onClick={this.openAll}>visibleAll T/F</button>
-        {selectedNodeId && <button onClick={this.copy}>Copy</button> }
-        {selectedNodeId !== copiedNodeId && copiedNodeId &&
-        <button onClick={this.paste}>Paste</button>
+        {selectedNodeId !== false ? <button onClick={this.copy}>Copy</button> : null}
+        {selectedNodeId !== copiedNodeId && copiedNodeId !== false ?
+        <button onClick={this.paste}>Paste</button> : null
         }
-
+        {/*{*/}
+        {/*  mainNodeIds.map( (nodeId) => {*/}
+        {/*    return <Node key={'main' + nodeId} id={nodeId}/>*/}
+        {/*  })*/}
+        {/*}*/}
         <Node id={0}/>
+
       </div>
     )
   }

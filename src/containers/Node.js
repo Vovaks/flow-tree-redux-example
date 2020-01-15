@@ -18,18 +18,19 @@ export class Node extends Component {
   handleAddChildClick = e => {
     e.preventDefault()
     const {addChild, createNode, id} = this.props
-    // const childId = createNode().nodeId
     const {nodeId, action_id} = createNode()
-    console.log('addChild',id, nodeId, action_id)
     addChild(id, nodeId, action_id)
 
   }
 
   handleRemoveClick = e => {
+
     e.preventDefault()
-    const {removeChild, deleteNode, parentId, id} = this.props
-    removeChild(parentId, id)
-    deleteNode(id)
+    const {removeChildFromParent, removeChild, deleteNode, parentId, id} = this.props
+    console.log('handleRemoveClick', parentId, id)
+    removeChildFromParent(parentId, id)
+    // removeChild(parentId, id)
+    // deleteNode(id)
   }
 
   renderChild = childId => {

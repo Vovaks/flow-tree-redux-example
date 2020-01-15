@@ -11,7 +11,8 @@ import {
   SELECT_NODE,
   CLEAR_SEARCH,
   COPY_NODE_ID,
-  PASTE_NODE_ID
+  PASTE_NODE_ID,
+  REMOVE_CHILD_FROM_PARENT,
 
 } from '../actions'
 import generateTree from '../generateTree'
@@ -30,7 +31,7 @@ const childIds = (state, action) => {
 }
 
 const node = (state, action) => {
-  console.log('node',state, action )
+  console.log('node', state, action)
   switch (action.type) {
     case CREATE_NODE:
       return {
@@ -90,25 +91,51 @@ const deleteMany = (state, ids) => {
   return {...state, treeList}
 }
 
-const pasteNode = (state, action  ) => {
+const removeChildFromParent = (state, action) => {
+  const {nodeId, childId} = action;
+  const parentIds = getParentIds(state, childId)
+  let newState = state;
+  console.log('parentIds',parentIds.length)
+  if (parentIds.length > 0) {
+    // parentIds.map((nodeId) => {
+      action.type = 'REMOVE_CHILD';
+      newState = {
+        ...newState,
+        treeList: newState.treeList.map((myNode, index) => {
+          const newNode = nodeId === myNode.id ? node(myNode, action) : myNode;
+          return Object.assign({}, node, {
+            ...newState[index],
+            ...newNode
+          })
+        })
+      }
+    // })
+  }
+  if(parentIds.length === 0){
+    const descendantIds = getAllDescendantIds(newState, childId);
+    newState = deleteMany(newState, [childId, ...descendantIds])
+  }
+  return newState
+}
+
+const pasteNode = (state, action) => {
   const {nodeId, childId} = action
-  const checkNodeForPaste = getAllParentId(state, [nodeId])
-  console.log('checkNodeForPaste',checkNodeForPaste.indexOf(childId))
-  if( checkNodeForPaste.indexOf(childId) > 0 ){
-    console.log('error - loop') //TODO: after error
+  const forCheckByParrentId = getAllParentId(state, [nodeId])
+  const forCheckByChildrenIds = getNodeChildrens(state, nodeId)
+  if (forCheckByParrentId.indexOf(childId) >= 0 || forCheckByChildrenIds.indexOf(childId) >= 0) {
+    console.log('error - loop || childrens') //TODO: after error
     return state;
   } else {
-    action.type='ADD_CHILD'
-    return{
-    ...state,
+    action.type = 'ADD_CHILD'
+    return {
+      ...state,
       treeList: state.treeList.map((myNode, index) => {
-      const newNode = nodeId === myNode.id ? node(myNode, action) : myNode;
-      return Object.assign({}, node, {
-        ...state[index],
-        ...newNode
+        const newNode = nodeId === myNode.id ? node(myNode, action) : myNode;
+        return Object.assign({}, node, {
+          ...state[index],
+          ...newNode
+        })
       })
-    })
-
     }
   }
 }
@@ -161,17 +188,37 @@ const search = (state, searchText) => {
   })
 }
 
-
 const getAllParentId = (state, treeSearchValues) => {
-  let nodeForVisible = []
+  let parentNodes = []
   state.treeList.map((node) => {
     let intersection = node.childIds.filter(x => treeSearchValues.includes(x));
-    const uniqParent = nodeForVisible.indexOf(node.id)
+    const uniqParent = parentNodes.indexOf(node.id)
     if (intersection.length > 0 && uniqParent < 0) {
-      return nodeForVisible.push(...nodeForVisible, node.id, ...getAllParentId(state, [node.id]))
+      return parentNodes.push(...parentNodes, node.id, ...getAllParentId(state, [node.id]))
     }
   })
-  return nodeForVisible
+  return parentNodes
+}
+
+const getParentIds = (state, childId) => {
+  let parentIds = []
+  state.treeList.map((node) => {
+    const intersection = node.childIds.indexOf(childId);
+    if (intersection >= 0) {
+      return parentIds.push(node.id)
+    }
+  })
+  return parentIds
+}
+
+const getNodeChildrens = (state, nodeId) => {
+  let childIds = []
+  state.treeList.map((node) => {
+    if (node.id === nodeId) {
+      return childIds = node.childIds
+    }
+  })
+  return childIds
 }
 
 
@@ -181,9 +228,9 @@ export default (
   state = {
     treeList: tree,
     visibleAll: false,
-    selectedNodeId: null,
-    copiedNodeId: null,
-    mainNodeIds: [0]
+    selectedNodeId: false,
+    copiedNodeId: false,
+    mainNodeIds: [0, 4]
   }, action) => {
 
   console.log('action.type:', action.type, action)
@@ -215,8 +262,7 @@ export default (
             inSearch: false,
             childVisible: false
           })
-        }
-        else {
+        } else {
           return Object.assign({}, node, {
             ...state.treeList[index],
             visible: true,
@@ -235,10 +281,13 @@ export default (
     }
   }
 
-  if( action.type === PASTE_NODE_ID) {
+  if (action.type === PASTE_NODE_ID) {
     return pasteNode(state, action)
   }
 
+  if (action.type === REMOVE_CHILD_FROM_PARENT) {
+    return removeChildFromParent(state, action)
+  }
 
 
   const {nodeId} = action;
