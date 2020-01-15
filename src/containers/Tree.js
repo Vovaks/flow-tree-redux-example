@@ -2,6 +2,10 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import * as actions from '../actions'
 import Node from './Node'
+import UndoRedo from './UndoRedo'
+import AddTodo from './AddTodo'
+import VisibleTodoList from './VisibleTodoList'
+import Footer from '../components/Footer'
 
 class Tree extends Component {
 
@@ -52,6 +56,11 @@ class Tree extends Component {
         {/*  })*/}
         {/*}*/}
         <Node id={0}/>
+
+        <AddTodo />
+        <UndoRedo />
+        <VisibleTodoList />
+        <Footer />
 
       </div>
     )

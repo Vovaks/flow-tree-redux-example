@@ -14,7 +14,8 @@
     "react-lorem-ipsum": "^1.4.4",
     "react-redux": "^7.0.2",
     "redux": "^4.0.1",
-    "redux-devtools-extension": "^2.13.8"
+    "redux-devtools-extension": "^2.13.8",
+    "redux-undo": "^1.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
