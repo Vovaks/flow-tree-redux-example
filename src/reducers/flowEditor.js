@@ -16,6 +16,7 @@ import {
 
 } from '../actions'
 import generateTree from '../generateTree'
+import undoable from "redux-undo";
 
 const tree = generateTree()
 
@@ -91,30 +92,43 @@ const deleteMany = (state, ids) => {
   return {...state, treeList}
 }
 
+// const removeChildFromParent = (state, action) => { //TODO: repair delete
+//   const {nodeId, childId} = action;
+//   console.log('removeChildFromParent', nodeId, childId)
+//   const parentIds = getParentIds(state, childId)
+//   let newState = state;
+//
+//   if (parentIds.length > 0) {
+//       action.type = 'REMOVE_CHILD';
+//       newState = {
+//         ...newState,
+//         treeList: newState.treeList.map((myNode, index) => {
+//           const newNode = nodeId === myNode.id ? node(myNode, action) : myNode;
+//           return Object.assign({}, node, {
+//             ...newState[index],
+//             ...newNode
+//           })
+//         })
+//       }
+//   }
+//
+//   console.log('D:', parentIds, parentIds.length)
+//   if(parentIds.length === 1){
+//     const descendantIds = getAllDescendantIds(newState, childId);
+//     console.log('getAllDescendantIds',descendantIds, childId)
+//     newState = deleteMany(newState, [childId, ...descendantIds])
+//   }
+//   console.log('newState', newState)
+//   // return newState
+//   return state
+// }
+
 const removeChildFromParent = (state, action) => {
   const {nodeId, childId} = action;
-  const parentIds = getParentIds(state, childId)
+  console.log('removeChildFromParent', nodeId, childId)
   let newState = state;
-  console.log('parentIds',parentIds.length)
-  if (parentIds.length > 0) {
-    // parentIds.map((nodeId) => {
-      action.type = 'REMOVE_CHILD';
-      newState = {
-        ...newState,
-        treeList: newState.treeList.map((myNode, index) => {
-          const newNode = nodeId === myNode.id ? node(myNode, action) : myNode;
-          return Object.assign({}, node, {
-            ...newState[index],
-            ...newNode
-          })
-        })
-      }
-    // })
-  }
-  if(parentIds.length === 0){
-    const descendantIds = getAllDescendantIds(newState, childId);
-    newState = deleteMany(newState, [childId, ...descendantIds])
-  }
+  const nodeChildrens = getNodeChildrens(newState, childId)
+  console.log('nodeChildrens', nodeChildrens)
   return newState
 }
 
@@ -148,9 +162,7 @@ const search = (state, searchText) => {
     }
     return newArr;
   }, []);
-
   const nodeForVisible = getAllParentId(state, treeSearchValues).concat(treeSearchValues);
-
   return Object.assign({}, state, {
     treeList: state.treeList.map((node, index) => {
       const visible = nodeForVisible.indexOf(node.id);
@@ -205,6 +217,7 @@ const getParentIds = (state, childId) => {
   state.treeList.map((node) => {
     const intersection = node.childIds.indexOf(childId);
     if (intersection >= 0) {
+
       return parentIds.push(node.id)
     }
   })
@@ -221,19 +234,15 @@ const getNodeChildrens = (state, nodeId) => {
   return childIds
 }
 
-
 //DEFAULT EXPORT
-
-export default (
+const flowEditor = (
   state = {
     treeList: tree,
     visibleAll: false,
     selectedNodeId: false,
     copiedNodeId: false,
     mainNodeIds: [0, 4]
-  }, action) => {
-
-  console.log('action.type:', action.type, action)
+  }, action) => { console.log('action.type:', action.type, action)
 
   if (action.type === VISIBLE_ALL) {
     return Object.assign({}, state, {
@@ -289,7 +298,6 @@ export default (
     return removeChildFromParent(state, action)
   }
 
-
   const {nodeId} = action;
   if (typeof nodeId === 'undefined') {
     return state
@@ -332,6 +340,12 @@ export default (
         ...newNode
       })
     })
-
   }
 }
+
+const undoableFlowEditor = undoable(flowEditor, {
+    limit: 10
+  }
+)
+
+export default undoableFlowEditor

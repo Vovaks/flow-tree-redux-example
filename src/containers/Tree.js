@@ -2,13 +2,9 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import * as actions from '../actions'
 import Node from './Node'
-import UndoRedo from './UndoRedo'
-import AddTodo from './AddTodo'
-import VisibleTodoList from './VisibleTodoList'
-import Footer from '../components/Footer'
+import UndoRedoFlowEditor from './UndoRendoFlowEditor'
 
 class Tree extends Component {
-
   search = () => {
     const { searchInList, clearSearch } = this.props
     this.searchInput.value === '' ?
@@ -18,25 +14,21 @@ class Tree extends Component {
     const { visibleAll } = this.props
     visibleAll()
   }
-
   clearSearchText = () => {
     const { clearSearch } = this.props
     this.searchInput.value = "";
     clearSearch()
   }
-
   copy = () => {
     const { copyNodeId } = this.props
     copyNodeId()
   }
-
   paste = () => {
     const { selectedNodeId, copiedNodeId } = this.props.flowEditor
     const {pasteNodeId} = this.props
 
     pasteNodeId(selectedNodeId, copiedNodeId)
   }
-
 
   render() {
     const { copiedNodeId, selectedNodeId, mainNodeIds } = this.props.flowEditor
@@ -50,32 +42,21 @@ class Tree extends Component {
         {selectedNodeId !== copiedNodeId && copiedNodeId !== false ?
         <button onClick={this.paste}>Paste</button> : null
         }
+        <UndoRedoFlowEditor/>
         {/*{*/}
         {/*  mainNodeIds.map( (nodeId) => {*/}
         {/*    return <Node key={'main' + nodeId} id={nodeId}/>*/}
         {/*  })*/}
         {/*}*/}
         <Node id={0}/>
-
-        <AddTodo />
-        <UndoRedo />
-        <VisibleTodoList />
-        <Footer />
-
       </div>
     )
   }
 }
 
 const mapStateToProps = (state) => {
-  if(state.flowEditor){
-    console.log('search', state.flowEditor.searchInput )
-  }
-  return state
+  const flowEditor = state.flowEditor.present
+  return {state, flowEditor}
 };
 
-
 export default connect(mapStateToProps, actions )(Tree);
-
-
-// export default Tree

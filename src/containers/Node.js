@@ -9,12 +9,10 @@ export class Node extends Component {
     const {increment, id} = this.props
     increment(id)
   }
-
   changeName = () => {
     const {changeName, id} = this.props
     changeName(id)
   }
-
   handleAddChildClick = e => {
     e.preventDefault()
     const {addChild, createNode, id} = this.props
@@ -22,17 +20,11 @@ export class Node extends Component {
     addChild(id, nodeId, action_id)
 
   }
-
   handleRemoveClick = e => {
-
     e.preventDefault()
     const {removeChildFromParent, removeChild, deleteNode, parentId, id} = this.props
-    console.log('handleRemoveClick', parentId, id)
     removeChildFromParent(parentId, id)
-    // removeChild(parentId, id)
-    // deleteNode(id)
   }
-
   renderChild = childId => {
     const {id} = this.props
     return (
@@ -41,12 +33,10 @@ export class Node extends Component {
       </li>
     )
   }
-
   visibleChange = () => {
     const {visibleChange, id} = this.props
     visibleChange(id)
   }
-
   selectNode = () => {
     const {selectNode, id} = this.props
     selectNode(id)
@@ -73,7 +63,7 @@ export class Node extends Component {
           <span style={{color: color, backgroundColor: selectableBackgroundColor }}
                 onClick={this.selectNode}
                 onDoubleClick={this.changeName}>
-            {action_id}
+            {id}...{action_id}
           </span>
           {' '}
           : {counter}
@@ -106,11 +96,10 @@ export class Node extends Component {
 }
 
 function mapStateToProps(state, ownProps) {
-  const elementPos = state.flowEditor.treeList.map((node, index) => {
+  const elementPos = state.flowEditor.present.treeList.map((node, index) => {
     return node.id}).indexOf(ownProps.id);
-  const objectFound = state.flowEditor.treeList[elementPos];
-  const fullState = state.flowEditor
-
+  const objectFound = state.flowEditor.present.treeList[elementPos];
+  const fullState = state.flowEditor.present
   return {objectFound, fullState}
 }
 
