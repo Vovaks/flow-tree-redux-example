@@ -92,43 +92,99 @@ const deleteMany = (state, ids) => {
   return {...state, treeList}
 }
 
-// const removeChildFromParent = (state, action) => { //TODO: repair delete
-//   const {nodeId, childId} = action;
-//   console.log('removeChildFromParent', nodeId, childId)
-//   const parentIds = getParentIds(state, childId)
-//   let newState = state;
-//
-//   if (parentIds.length > 0) {
-//       action.type = 'REMOVE_CHILD';
-//       newState = {
-//         ...newState,
-//         treeList: newState.treeList.map((myNode, index) => {
-//           const newNode = nodeId === myNode.id ? node(myNode, action) : myNode;
-//           return Object.assign({}, node, {
-//             ...newState[index],
-//             ...newNode
-//           })
-//         })
-//       }
-//   }
-//
-//   console.log('D:', parentIds, parentIds.length)
-//   if(parentIds.length === 1){
-//     const descendantIds = getAllDescendantIds(newState, childId);
-//     console.log('getAllDescendantIds',descendantIds, childId)
-//     newState = deleteMany(newState, [childId, ...descendantIds])
-//   }
-//   console.log('newState', newState)
-//   // return newState
-//   return state
-// }
-
 const removeChildFromParent = (state, action) => {
   const {nodeId, childId} = action;
-  console.log('removeChildFromParent', nodeId, childId)
+  const parentIds = getParentIds(state, childId)
+  let newState = state;
+
+  newState = {...newState ,...removeChildOrNode(newState, nodeId, childId)}
+
+  if (parentIds.length > 0) {
+    action.type = 'REMOVE_CHILD';
+    newState = {
+      ...newState,
+      treeList: newState.treeList.map((myNode, index) => {
+        const newNode = nodeId === myNode.id ? node(myNode, action) : myNode;
+        return Object.assign({}, node, {
+          ...newState[index],
+          ...newNode
+        })
+      })
+    }
+  }
+  if(parentIds.length === 1){
+    let treeList = [...newState.treeList]
+    treeList.map((myNode, index) => {
+        if(myNode.id === childId)
+          treeList.splice(index, 1)
+      }
+    )
+    newState = {...state, treeList}
+  }
+  return newState
+}
+
+const removeChildOrNode = (state,nodeId, childId) => {
   let newState = state;
   const nodeChildrens = getNodeChildrens(newState, childId)
-  console.log('nodeChildrens', nodeChildrens)
+  if (nodeChildrens.length > 0) {
+
+    nodeChildrens.map((id) => {
+      const nodeChildrens = getNodeChildrens(newState, id)
+      if(nodeChildrens.length > 0) {
+        removeChildOrNode(newState, childId, id)
+      }
+      newState = {...newState ,...checkIsExist(newState, childId, id)}
+
+    })
+  } else {
+    newState = {...newState ,...checkIsExist(newState, nodeId, childId)}
+  }
+
+  return newState
+}
+
+const checkIsExist = (state,nodeId, childId) => {
+  let newState = state
+  let action = {nodeId, childId}
+  action.type = 'REMOVE_CHILD';
+  const parentIds = getParentIds(state, childId)
+  if (parentIds.length <= 1) {
+        newState = {
+          ...newState,
+          treeList: newState.treeList.map((myNode, index) => {
+            const newNode = nodeId === myNode.id ? node(myNode, action) : myNode;
+            return Object.assign({}, node, {
+              ...newState[index],
+              ...newNode
+            })
+          })
+        }
+
+        let treeList = [...newState.treeList]
+        treeList.map((myNode, index) => {
+            myNode.id === childId &&
+            treeList.splice(index, 1)
+          })
+      newState = {
+        ...newState,
+        treeList
+      }
+
+  } else {
+    if (parentIds.length > 0) {
+      newState = {
+        ...newState,
+        treeList: newState.treeList.map((myNode, index) => {
+          const newNode = nodeId === myNode.id ? node(myNode, action) : myNode;
+          return Object.assign({}, node, {
+            ...newState[index],
+            ...newNode
+          })
+        })
+      }
+  }
+  }
   return newState
 }
 
@@ -242,7 +298,8 @@ const flowEditor = (
     selectedNodeId: false,
     copiedNodeId: false,
     mainNodeIds: [0, 4]
-  }, action) => { console.log('action.type:', action.type, action)
+  }, action) => {
+  console.log('action.type:', action.type, action)
 
   if (action.type === VISIBLE_ALL) {
     return Object.assign({}, state, {
